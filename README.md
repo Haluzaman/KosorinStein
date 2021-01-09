@@ -20,10 +20,10 @@ My own wolfenstein 3d clone
 - http://www.wolfenvault.com/resources.html
 
 ## Screenshots
-![scr](https://github.com/Haluzaman/KosorinStein/screenShots/screen1.PNG)
+![scr](https://github.com/Haluzaman/KosorinStein/blob/master/screenShots/screen1.PNG)
 
-![scr](https://github.com/Haluzaman/KosorinStein/screenShots/screen2.PNG)
+![scr](https://github.com/Haluzaman/KosorinStein/blob/master/screenShots/screen2.PNG)
 
-![scr](https://github.com/Haluzaman/KosorinStein/screenShots/screen3.PNG)
+![scr](https://github.com/Haluzaman/KosorinStein/blob/master/screenShots/screen3.PNG)
 
-![scr](https://github.com/Haluzaman/KosorinStein/screenShots/screen4.PNG)
+![scr](https://github.com/Haluzaman/KosorinStein/blob/master/screenShots/screen4.PNG)
