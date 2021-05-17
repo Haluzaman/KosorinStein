@@ -1,13 +1,12 @@
 package utils.render;
 
-import graphics.SpriteSheet;
-import graphics.Texture;
-import javafx.util.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import utils.*;
+import graphics.*;
 import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

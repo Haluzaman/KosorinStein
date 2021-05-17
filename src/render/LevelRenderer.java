@@ -106,6 +106,7 @@ public class LevelRenderer {
             }
         }
 
+        //we have to light world, entities could be transparent and wont be correctly lighted if this call is not here!
         applyLights();
         renderEntities(screenWidth, screenHeight, screenPixels, lightSources);
         mergeAlpha();
@@ -118,8 +119,7 @@ public class LevelRenderer {
         for(int i = 0; i < screenPixels.length; i++) {
             //transparent is in foreground
             if(transDepthBuffer[i] < depthBuffer[i]) {
-                int transPixBlended = MathUtils.blendPixel(transScreenPixels[i], screenPixels[i]);
-                screenPixels[i] = transPixBlended;
+                screenPixels[i] = MathUtils.blendPixel(transScreenPixels[i], screenPixels[i]);
             }
         }
     }
@@ -213,7 +213,7 @@ public class LevelRenderer {
                 this.depthBuffer[screenPos] = inter.distToWall;
                 this.pixWorldPos[screenPos].setXY(inter.position.x, inter.position.y);
                 this.screenPixels[screenPos] = MathUtils.blendPixel(currColor, pix);
-            } else if(alpha != 0){
+            } else /*if(alpha != 0)*/{
                 this.transDepthBuffer[screenPos] = inter.distToWall;
                 this.transPixWorldPos[screenPos].setXY(inter.position.x, inter.position.y);
                 int lighted = applyLightsToPixel(this.transPixWorldPos[screenPos], currColor, lightSources);
@@ -225,47 +225,51 @@ public class LevelRenderer {
     private void applyLights() {
 
         for(int i = 0; i < screenPixels.length; i++) {
-            int finalPixel = 0x00;
-            int pixel = screenPixels[i];
-
-            for(ILightSource lightSrc: level.getLightSources()) {
-                var props = lightSrc.getLightSourceProperty();
-                double distLightToInter = MathUtils.getSimpleDistance(pixWorldPos[i], props.worldPosition);
-                double attentuation = 1.0 / (1.0 + props.attentuation * Math.pow(distLightToInter, 2));
-                int currR = ((pixel & 0x00ff0000) >> 16);
-                int currG = ((pixel & 0x0000ff00) >> 8);
-                int currB = (pixel & 0x000000ff);
-                //ARGB
-                int red = ((int)(currR * attentuation * props.red));
-                int green = ((int)(currG * attentuation * props.green));
-                int blue = ((int)(currB * attentuation * props.blue));
-                finalPixel += ((red << 16) | (green << 8) | blue);
-                finalPixel = MathUtils.clamp(finalPixel, 0x00ffffff, 0x00000000);
-                screenPixels[i] = (pixel & 0xff000000) | finalPixel;
-            }
+            screenPixels[i] = applyLightsToPixel(pixWorldPos[i], screenPixels[i], level.getLightSources());
         }
 
     }
 
     private int applyLightsToPixel(Vector2d pixelWorldPos, int pixel, List<ILightSource> lightSources) {
-        int finalPixel = 0x00;
+        float ambientStrength = 0.2f;
+
+        int currR = ((pixel & 0x00ff0000) >> 16);
+        int currG = ((pixel & 0x0000ff00) >> 8);
+        int currB = (pixel & 0x000000ff);
+
+        //apply diffuse
+        double ambientRed = ((ambientStrength * 0.3));
+        double ambientGreen = ((ambientStrength * 0.3));
+        double ambientBlue = ((ambientStrength * 0.4));
+
+        double lightR = 0.0f;
+        double lightG = 0.0f;
+        double lightB = 0.0f;
 
         for (ILightSource lightSrc: lightSources) {
             var props = lightSrc.getLightSourceProperty();
             double distLightToInter = MathUtils.getSimpleDistance(pixelWorldPos, props.worldPosition);
             double attentuation = 1.0 / (1.0 + props.attentuation * Math.pow(distLightToInter, 2));
-            int currR = ((pixel & 0x00ff0000) >> 16);
-            int currG = ((pixel & 0x0000ff00) >> 8);
-            int currB = (pixel & 0x000000ff);
+
             //ARGB
-            int red = ((int)(currR * attentuation * props.red));
-            int green = ((int)(currG * attentuation * props.green));
-            int blue = ((int)(currB * attentuation * props.blue));
-            finalPixel += ((red << 16) | (green << 8) | blue);
-            finalPixel = MathUtils.clamp(finalPixel, 0x00ffffff, 0x00000000);
+            lightR += attentuation * props.red;
+            lightG += attentuation * props.green;
+            lightB += attentuation * props.blue;
+            lightR = MathUtils.clamp(lightR, 1.00f,0.00f);
+            lightG = MathUtils.clamp(lightG, 1.00f,0.00f);
+            lightB = MathUtils.clamp(lightB, 1.00f,0.00f);
         }
 
-        return (pixel & 0xff000000) | finalPixel;
+        int red = ((int)((ambientRed + lightR) * currR));
+        int green = ((int)((ambientGreen + lightG) * currG));
+        int blue = ((int)((ambientBlue + lightB) * currB));
+
+        //clamp values
+        red = MathUtils.clamp(red, 255,0);
+        green = MathUtils.clamp(green, 255,0);
+        blue = MathUtils.clamp(blue, 255,0);
+
+        return (pixel & 0xff000000) | ((red << 16) | (green << 8) | blue);
     }
 
     private int applyLightsToPixelAndBlend(Vector2d pixelWorldPos, int pixel, int oldPix, List<ILightSource> lightSources) {

@@ -8,7 +8,7 @@ public class SpriteSheet {
     private int height;
     private BufferedImage image;
 
-    private Texture textureAtlas[][];
+    public final Texture[][] textureAtlas;
 
     public SpriteSheet(BufferedImage image, Texture[][] textureAtlas) {
         this.textureAtlas = textureAtlas;
