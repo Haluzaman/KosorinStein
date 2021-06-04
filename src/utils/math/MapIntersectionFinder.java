@@ -4,6 +4,7 @@ import entities.Door;
 import level.Level;
 import level.MapInfo;
 import level.Tile;
+
 import java.util.List;
 
 public class MapIntersectionFinder {
@@ -21,7 +22,8 @@ public class MapIntersectionFinder {
 
         while(!stop) {
             intersection = performDDA(currRay, correctionAngle,ray.getOrigin());
-            if(intersection.t == null) break;
+            if(intersection.t == null)
+                break;
             intersections.add(intersection);
 
             if(intersection.wallType == Tile.HORIZ_WINDOW) {
@@ -74,7 +76,6 @@ public class MapIntersectionFinder {
                 int wallType = mapInfo.getTileAt(mapX, mapY).type;
                 if(wallType == 1) {
                     wallHit = true;
-//                    verInter.distToWall = (verInter.position.x - rayOrigin.x) * Math.cos(correctionAngle) + (-verInter.position.y + rayOrigin.y) * Math.sin(correctionAngle);
                     verInter.distToWall = (verInter.position.x - compDistFrom.x) * Math.cos(correctionAngle) + (-verInter.position.y + compDistFrom.y) * Math.sin(correctionAngle);
                     verInter.wallType = wallType;
                     verInter.t = mapInfo.getTileAt(mapX, mapY);
@@ -101,7 +102,6 @@ public class MapIntersectionFinder {
                 int wallType = mapInfo.getTileAt(mapX, mapY).type;
                 if(wallType == 1) {
                     wallHit = true;
-//                    horizInter.distToWall = (horizInter.position.x - rayOrigin.x) * Math.cos(correctionAngle) + (-horizInter.position.y + rayOrigin.y) * Math.sin(correctionAngle);
                     horizInter.distToWall = (horizInter.position.x - compDistFrom.x) * Math.cos(correctionAngle) + (-horizInter.position.y + compDistFrom.y) * Math.sin(correctionAngle);
                     horizInter.wallType = wallType;
                     horizInter.t = mapInfo.getTileAt(mapX, mapY);
@@ -147,6 +147,23 @@ public class MapIntersectionFinder {
         to.isVertical = isVertical;
         to.wallType = from.wallType;
         to.t = from.t;
+        if(from.t == null) {
+            return;
+        }
+        to.wallCollisionSide = getCollisionSide(from);
+    }
+
+    private int getCollisionSide(Intersection i) {
+        if(i.isVertical) {
+            double tileMidX = i.t.x + 0.5d;
+            double diff = tileMidX - i.position.x;
+            return (diff < 0) ? Intersection.LEFT_SIDE : Intersection.RIGHT_SIDE;
+        }
+
+        double tileMidY = i.t.y + 0.5d;
+        double diff = tileMidY - i.position.y;
+
+        return (diff < 0) ? Intersection.UP_SIDE : Intersection.DOWN_SIDE;
     }
 
     private boolean handleHit(Ray ray, double correctionAngle, Vector2d rayOrigin, MapInfo mapInfo, Intersection horizInter, double ya, double xa, int mapX, int mapY, int wallType, Hit dist) {
@@ -165,4 +182,6 @@ public class MapIntersectionFinder {
 
         return wallHit;
     }
+
+
 }

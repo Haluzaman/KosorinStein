@@ -1,14 +1,10 @@
 package utils.math;
 
-import entities.Door;
-import level.Level;
-import level.MapInfo;
-import level.Tile;
 import render.Camera;
 import utils.collision.BoundingCircle;
 import utils.collision.BoundingLine;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class MathUtils {
 
@@ -182,7 +178,7 @@ public class MathUtils {
         int newGreen = (int)((alpha * currG) + (op * oldG));
         int newBlue = (int)((alpha * currB) + (op * oldB));
 
-        return (0xff << 24) | ((newRed << 16) | (newGreen << 8) | newBlue);
+        return (0xff000000) | ((newRed << 16) | (newGreen << 8) | newBlue);
     }
 
     public static double getAngle(Vector2d p1, Vector2d p2) {
