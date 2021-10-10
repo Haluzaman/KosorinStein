@@ -24,7 +24,6 @@ public class LevelRenderer {
     private Level level;
     private double[] depthBuffer;
     private Vector2d[] pixWorldPos;
-    private Vector2d[] transPixWorldPos;
 
     private Camera camera;
     private Graphics2D g2d;
@@ -50,10 +49,8 @@ public class LevelRenderer {
         this.depthBuffer = new double[screenWidth * screenHeight];
 
         this.pixWorldPos = new Vector2d[screenWidth * screenHeight];
-        this.transPixWorldPos = new Vector2d[screenWidth * screenHeight];
         for(int i = 0; i < this.pixWorldPos.length; i++) {
             this.pixWorldPos[i] = new Vector2d();
-            this.transPixWorldPos[i] = new Vector2d();
         }
 
         this.screenSlices = new ArrayList<>(this.screenWidth);
@@ -82,6 +79,10 @@ public class LevelRenderer {
             var currSlices = screenSlices.get(col);
             var currSlice = currSlices.peek();
 
+            if(currSlice == null) {
+                System.out.println("SLICE IS NULL!!!!");
+                continue;
+            }
             drawFloorAndCeiling(col, ray, currSlice.drawStartY + currSlice.sliceHeight, lightSources);
         }
 
@@ -225,12 +226,15 @@ public class LevelRenderer {
 
         for(int stripe = 0; stripe < spriteWidth; stripe++)
         {
+            int startStripeX = stripe + drawStartX;
+            if(startStripeX < 0 || startStripeX >= screenWidth)
+                continue;
             int texX = (int)((double)(stripe) / spriteWidth * tex.getWidth());
             if(transformY > 0 ) {
                 ScreenSlice slice = new ScreenSlice();
                 slice.sliceHeight = spriteHeight;
                 slice.distanceToSlice = transformY;
-                slice.drawStartX = stripe + drawStartX;
+                slice.drawStartX = startStripeX;
                 slice.drawStartY = drawStartY;
                 slice.texture = tex;
                 slice.texOffsetX = texX;
@@ -239,7 +243,6 @@ public class LevelRenderer {
                 slice.normalY = Math.sin(angle);
                 slice.name = entity.getClass().getSimpleName();
                 insertSpriteSlice(slice);
-
             }
         }
     }
@@ -293,9 +296,9 @@ public class LevelRenderer {
             lightR += attentuation * props.red;
             lightG += attentuation * props.green;
             lightB += attentuation * props.blue;
-            lightR = MathUtils.clamp(lightR, 1.00f,0.00f);
-            lightG = MathUtils.clamp(lightG, 1.00f,0.00f);
-            lightB = MathUtils.clamp(lightB, 1.00f,0.00f);
+            lightR = MathUtils.clamp(lightR, 1.0f,0.0f);
+            lightG = MathUtils.clamp(lightG, 1.0f,0.0f);
+            lightB = MathUtils.clamp(lightB, 1.0f,0.0f);
         }
 
         double red = ambientRed + lightR;
@@ -333,7 +336,7 @@ public class LevelRenderer {
         }
 
         double projectedHeight = Math.round(((screenHeight * i.t.height) / i.distToWall));
-        int startY = (int)(screenHeight / 2 - (projectedHeight / 2));
+        int startY = (int)(screenHeight / 2.0f - (projectedHeight / 2.0f));
 //        if(startY < 0) startY = 0;
 
         sl.sliceHeight = (int)projectedHeight;
@@ -350,7 +353,7 @@ public class LevelRenderer {
             if(i.wallType == Tile.HORIZ_DOOR) {
                 if(!currRay.isFacingUp()) {
                     wallX -= Math.floor(i.position.x);
-                    wallX = 1.0 - wallX - level.getDoor((int)i.position.x, (int)i.position.y).getOffset();
+                    wallX = 1.0f - wallX - level.getDoor((int)i.position.x, (int)i.position.y).getOffset();
                 } else {
                     Door d = level.getDoor((int)i.position.x, (int)i.position.y);
                     wallX -= Math.floor(i.position.x) - d.getOffset();
@@ -383,7 +386,7 @@ public class LevelRenderer {
 
             if(MathUtils.isInBounds(sl.drawStartX, screenRow, screenWidth, screenHeight)) {
                 int screenPos = sl.drawStartX + screenRow * screenWidth;
-                int tY = (int)(((double)row / (double)sl.sliceHeight) * texture.getHeight());
+                int tY = (int)(((double)row / (double)sl.sliceHeight) * (double)texture.getHeight());
                 int oldPix = screenPixels[screenPos];
                 int currPixel = texture.getPixelAt(sl.texOffsetX, tY);
                 if(((currPixel >> 24) & 0xff) != 0 && sl.distanceToSlice < this.depthBuffer[screenPos]) {
@@ -397,7 +400,7 @@ public class LevelRenderer {
     }
 
     private void insertSpriteSlice(ScreenSlice s) {
-        if(s.drawStartX < 0 || s.drawStartX >= screenWidth) return;
+//        if(s.drawStartX < 0 || s.drawStartX >= screenWidth) return;
         var currSlices = screenSlices.get(s.drawStartX);
         currSlices.add(s);
     }
