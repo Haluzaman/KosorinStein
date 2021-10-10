@@ -7,12 +7,15 @@ import org.w3c.dom.NodeList;
 
 import utils.*;
 import graphics.*;
+import utils.io.FileReader;
+
 import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 public class SpriteSheetLoader {
@@ -29,7 +32,7 @@ public class SpriteSheetLoader {
     private static Map<String, SpriteSheet> createSpriteSheetsFromMeta(String fileName) {
         Map<String, SpriteSheet> spriteSheetMap = new HashMap<>();
         try {
-            File xmlFile = new File("res/meta/" + fileName);
+            InputStream xmlFile = FileReader.readFile(FileReader.FileType.META, fileName);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlFile);
@@ -52,14 +55,6 @@ public class SpriteSheetLoader {
         return spriteSheetMap;
     }
 
-//    private static Pair<String, SpriteSheet> fillSpriteSheetFromNode(Node node) {
-//        Element element = (Element) node;
-//
-//        String type = element.getElementsByTagName("type").item(0).getTextContent().replaceAll("\\s+|,","");
-//
-//    }
-
-
     private static String getStrElementByTagName(Element e, String name, int at) {
         return e.getElementsByTagName(name).item(at).getTextContent().replaceAll("\\s+|","");
     }
@@ -70,8 +65,7 @@ public class SpriteSheetLoader {
 
     private static int getIntElementByTagName(Element e, String name) {
        String elStr = e.getElementsByTagName(name).item(0).getTextContent().replaceAll("\\s+|","");
-       int elVal = Integer.parseInt(elStr);
-       return elVal;
+        return Integer.parseInt(elStr);
     }
 
     private static Pair<String, SpriteSheet> fillNormalSpriteSheetFromElement(Element element) {
