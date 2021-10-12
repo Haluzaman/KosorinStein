@@ -1,9 +1,9 @@
 package utils.io;
 
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class FileLoader {
 
@@ -40,26 +40,6 @@ public class FileLoader {
 
         System.out.println("Reading file: " + finalPath);
         return finalPath;
-    }
-
-    public static File getFile(FileType fileType, String filename) {
-        String finalPath;
-
-        if(filename.contains(".")) {
-            finalPath = String.format("%s/%s",fileType.getFileType(), filename);
-        } else {
-            finalPath = String.format("%s/%s.%s",fileType.getFileType(), filename, fileType.getFileExtension());
-        }
-
-        try {
-            URL resource = FileLoader.class.getClassLoader().getResource(finalPath);
-            URI uri = resource.toURI();
-            return new File(uri);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     public static BufferedReader getFileAsBufferedReader(FileType fileType, String fileName) throws FileNotFoundException {
