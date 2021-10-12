@@ -5,7 +5,7 @@ My own wolfenstein 3d clone
 - textured walls
 - doors
 - entites
-- alpha blending ( semi transparent entities are also supported - in demo is semi transparent barrel)
+- alpha blending ( semi transparent  entities are also supported - in demo is semi transparent barrel)
 - weapons
 - you can see through windows
 - dynamic lightning
