@@ -76,7 +76,7 @@ public class MapIntersectionFinder {
                 int wallType = mapInfo.getTileAt(mapX, mapY).type;
                 if(wallType == 1) {
                     wallHit = true;
-                    verInter.distToWall = (verInter.position.x - compDistFrom.x) * Math.cos(correctionAngle) + (-verInter.position.y + compDistFrom.y) * Math.sin(correctionAngle);
+                    verInter.distToWall = MathUtils.getDistance(verInter.position, compDistFrom);
                     verInter.wallType = wallType;
                     verInter.t = mapInfo.getTileAt(mapX, mapY);
                 } else {
@@ -102,7 +102,7 @@ public class MapIntersectionFinder {
                 int wallType = mapInfo.getTileAt(mapX, mapY).type;
                 if(wallType == 1) {
                     wallHit = true;
-                    horizInter.distToWall = (horizInter.position.x - compDistFrom.x) * Math.cos(correctionAngle) + (-horizInter.position.y + compDistFrom.y) * Math.sin(correctionAngle);
+                    horizInter.distToWall = MathUtils.getDistance(horizInter.position, compDistFrom);
                     horizInter.wallType = wallType;
                     horizInter.t = mapInfo.getTileAt(mapX, mapY);
                 } else if(wallType == Tile.HORIZ_DOOR) {
@@ -112,13 +112,13 @@ public class MapIntersectionFinder {
                     Vector2d RightPoint = door.getRightPoint();
                     Ray r = new Ray(compDistFrom, ray.getDirection(), ray.getAngle());
                     var dist = MathUtils.GetRayToLineSegmentIntersection(r, leftPoint, RightPoint);
-                    wallHit = handleHit(ray, correctionAngle, rayOrigin, mapInfo, horizInter, horizYa, horizXa, mapX, mapY, wallType, dist);
+                    wallHit = handleHit(ray, rayOrigin, mapInfo, horizInter, horizYa, horizXa, mapX, mapY, wallType, dist);
                 } else if(wallType == Tile.HORIZ_WINDOW) {
                     Vector2d leftPos = new Vector2d(mapX, mapY + 0.5);
                     Vector2d rightPos = new Vector2d(mapX + 1.0, mapY + 0.5);
                     Ray r = new Ray(compDistFrom, ray.getDirection(), ray.getAngle());
                     var dist = MathUtils.GetRayToLineSegmentIntersection(r, leftPos, rightPos);
-                    wallHit = handleHit(ray, correctionAngle, rayOrigin, mapInfo, horizInter, horizYa, horizXa, mapX, mapY, wallType, dist);
+                    wallHit = handleHit(ray, rayOrigin, mapInfo, horizInter, horizYa, horizXa, mapX, mapY, wallType, dist);
                 } else {
                     nextStep(horizInter, horizXa, horizYa);
                 }
@@ -132,6 +132,8 @@ public class MapIntersectionFinder {
             fillIntersection(finalInter, horizInter, false);
         }
 
+        //correction
+        finalInter.distToWall *= Math.cos(-ray.getAngle() + correctionAngle);
         return finalInter;
     }
 
@@ -166,14 +168,14 @@ public class MapIntersectionFinder {
         return (diff < 0) ? Intersection.UP_SIDE : Intersection.DOWN_SIDE;
     }
 
-    private boolean handleHit(Ray ray, double correctionAngle, Vector2d rayOrigin, MapInfo mapInfo, Intersection horizInter, double ya, double xa, int mapX, int mapY, int wallType, Hit dist) {
+    private boolean handleHit(Ray ray, Vector2d rayOrigin, MapInfo mapInfo, Intersection horizInter, double ya, double xa, int mapX, int mapY, int wallType, Hit dist) {
         boolean wallHit = false;
 
         if (dist != null) {
             wallHit = true;
             horizInter.position.x = rayOrigin.x + dist.distFromSrc * ray.getDirection().x;
             horizInter.position.y = rayOrigin.y + dist.distFromSrc * -ray.getDirection().y;
-            horizInter.distToWall = (horizInter.position.x - rayOrigin.x) * Math.cos(correctionAngle) + (-horizInter.position.y + rayOrigin.y) * Math.sin(correctionAngle);
+            horizInter.distToWall = MathUtils.getDistance(horizInter.position, rayOrigin);
             horizInter.wallType = wallType;
             horizInter.t = mapInfo.getTileAt(mapX, mapY);
         } else {
